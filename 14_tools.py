@@ -14,6 +14,15 @@ def add(a: int, b: int) -> int:
     """Add two numbers."""
     return a + b
 
+@tool
+def multiply(a:int, b:int) -> int:
+    """Multiply two numbers."""
+    return a*b
+
+tools = {
+    "add": add,
+    "multiply": multiply
+}
 
 # 2. Create the LLM
 llm = ChatGoogleGenerativeAI(
@@ -22,52 +31,37 @@ llm = ChatGoogleGenerativeAI(
 
 
 # 3. Give the tool to the LLM
-llm_with_tools = llm.bind_tools([add])
+llm_with_tools = llm.bind_tools([add, multiply])
 
 
 # 4. User's question
 user_message = HumanMessage(
-    content="What is 25 + 17?"
+    content= "Calculate 10 + 5 and then multiply the result by 3."
 )
 
+response = llm_with_tools.invoke([user_message])
 
-# 5. Ask the LLM
-response = llm_with_tools.invoke(
-    [user_message]
-)
+messages = [
+    user_message,
+    response
+]
 
-print("LLM tool call:")
-print(response.tool_calls)
+while response.tool_calls:
 
+    for tool_call in response.tool_calls:
 
-# 6. Get the tool call
-tool_call = response.tool_calls[0]
+        selected_tool = tools[tool_call["name"]]
 
+        result = selected_tool.invoke(tool_call["args"])
 
-# 7 Execute the actual Python tool
-result = add.invoke(tool_call["args"])
+        tool_message = ToolMessage(
+            content=str(result),
+            tool_call_id=tool_call["id"]
+        )
 
-print("Tool result:")
-print(result)
+        messages.append(tool_message)
 
+    response = llm_with_tools.invoke(messages)
+    messages.append(response)
 
-# 8 the tool result back to the LLM
-tool_message = ToolMessage(
-    content=str(result),
-    tool_call_id=tool_call["id"]
-)
-
-
-# 9 the final human-readable answer
-final_response = llm_with_tools.invoke(
-    [
-        user_message,
-        response,
-        tool_message
-    ]
-)
-
-
-# 10 final answer
-print("Final answer:")
-print(final_response.content)
+print(response.text)
