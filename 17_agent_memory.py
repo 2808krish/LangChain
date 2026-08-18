@@ -6,9 +6,7 @@ from langchain_core.messages import HumanMessage
 
 load_dotenv()
 
-llm = ChatGoogleGenerativeAI(
-    model="gemini-3.6-flash"
-)
+llm = ChatGoogleGenerativeAI(model="gemini-3.6-flash")
 
 agent = create_agent(
     model=llm,
@@ -35,18 +33,16 @@ def chat(session_id, user_message):
             "messages": sessions[session_id]
         }
     )
-
+    
     # Get the agent's latest message
     ai_message = result["messages"][-1]
 
     # Save AI response to memory
     sessions[session_id].append(ai_message)
-
     return ai_message.content
 
 # Session 1
 print("Session 1:")
-
 print(chat(
     "krish_123",
     "Hi, my name is Krish."
@@ -59,7 +55,6 @@ print(chat(
 
 # Session 2
 print("\nSession 2:")
-
 print(chat(
     "rahul_456",
     "What is my name?"
