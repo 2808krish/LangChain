@@ -4,6 +4,10 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
+from dotenv import load_dotenv
+import os 
+
+load_dotenv()
 
 # Load the Document
 
@@ -74,10 +78,10 @@ context = "\n\n".join(
 #Generate answer
 messages = prompt.invoke({
     "context": context,
-    "qustion": query
+    "question": query
 })
 
 response = llm.invoke(messages)
 
 print("\n===== FINAL ANSWER =====")
-print(response.content)
+print(response.content) 
