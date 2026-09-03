@@ -1,21 +1,28 @@
 from dotenv import load_dotenv
+
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_qdrant import QdrantVectorStore
 
+
 load_dotenv()
 
 
-# 1. Load document
+# ============================================================
+# 1. LOAD DOCUMENT
+# ============================================================
 
 loader = TextLoader("smartcharge.txt")
+
 documents = loader.load()
 
 print("Document Loaded:", len(documents))
 
 
-# 2. Split document
+# ============================================================
+# 2. SPLIT DOCUMENT
+# ============================================================
 
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=1000,
@@ -27,7 +34,9 @@ chunks = text_splitter.split_documents(documents)
 print("Number of Chunks:", len(chunks))
 
 
-# 3. Gemini Embeddings
+# ============================================================
+# 3. GEMINI EMBEDDINGS
+# ============================================================
 
 embeddings = GoogleGenerativeAIEmbeddings(
     model="gemini-embedding-2"
@@ -36,18 +45,23 @@ embeddings = GoogleGenerativeAIEmbeddings(
 print("Embedding model initialized")
 
 
-# 4. Create Qdrant Vector Store
+# ============================================================
+# 4. CREATE PERSISTENT LOCAL QDRANT VECTOR STORE
+# ============================================================
 
 vector_store = QdrantVectorStore.from_documents(
-    documents= chunks,
-    embedding= embeddings,
-    location= ":memory:",
-    collection_name= "smartcharge"
+    documents=chunks,
+    embedding=embeddings,
+    path="./qdrant_data",
+    collection_name="smartcharge"
 )
+
 print("Qdrant Vector Store created successfully")
 
 
-# 5. Test retrieval
+# ============================================================
+# 5. TEST RETRIEVAL
+# ============================================================
 
 results = vector_store.similarity_search(
     "What is SmartCharge AI?",
@@ -56,6 +70,8 @@ results = vector_store.similarity_search(
 
 print("\n===== RETRIEVED DOCUMENTS =====")
 
+
 for i, doc in enumerate(results, 1):
+
     print(f"\nResult {i}:")
     print(doc.page_content)

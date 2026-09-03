@@ -52,7 +52,7 @@ vector_store = QdrantVectorStore(
     client=client,
     embedding=embeddings,
     collection_name="smartcharge"
-)
+) 
 
 print("Vector store connected successfully.")
 
